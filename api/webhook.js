@@ -12,9 +12,26 @@ function getAuthCredentials() {
 
   if (process.env.GOOGLE_PRIVATE_KEY && process.env.GOOGLE_CLIENT_EMAIL) {
     console.log("✅ Using environment variables for authentication");
+
+    // Private key 처리 개선
+    let privateKey = process.env.GOOGLE_PRIVATE_KEY;
+
+    // 따옴표 제거 (만약 있다면)
+    if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+      privateKey = privateKey.slice(1, -1);
+    }
+
+    // 개행 문자 처리
+    privateKey = privateKey.replace(/\\n/g, "\n");
+
+    console.log(
+      "🔑 Private key starts with:",
+      privateKey.substring(0, 50) + "..."
+    );
+
     return {
       client_email: process.env.GOOGLE_CLIENT_EMAIL,
-      private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+      private_key: privateKey,
     };
   } else {
     console.log(

@@ -33,7 +33,7 @@ function getAuthCredentials() {
         "❌ Failed to decode Base64 service account:",
         error.message
       );
-      throw new Error("Invalid Base64 encoded service account");
+      // Base64 디코딩 실패 시 다른 방법 시도하도록 계속 진행
     }
   }
 
@@ -82,22 +82,21 @@ function getAuthCredentials() {
       client_email: process.env.GOOGLE_CLIENT_EMAIL,
       private_key: privateKey,
     };
-  } else {
-    console.log(
-      "⚠️ Environment variables not found, trying service account file..."
-    );
-    try {
-      // Vercel에서는 루트 경로에서 파일을 찾도록 수정
-      const key = require("../service-account.json");
-      console.log("✅ Using service account file for authentication");
-      return key;
-    } catch (error) {
-      console.error("❌ Service account file not found:", error.message);
-      throw new Error(
-        "No authentication credentials found. Please set environment variables (GOOGLE_CLIENT_EMAIL, GOOGLE_PRIVATE_KEY) or add service-account.json file."
-      );
-    }
   }
+
+  // 방법 3: 로컬 파일 시도
+  try {
+    const key = require("../service-account.json");
+    console.log("✅ Using service account file for authentication");
+    console.log("🔑 Service account client_email:", key.client_email);
+    return key;
+  } catch (error) {
+    console.log("⚠️ Service account file not found");
+  }
+
+  throw new Error(
+    "No authentication credentials found. Please set GOOGLE_SERVICE_ACCOUNT_BASE64 environment variable or add service-account.json file."
+  );
 }
 
 module.exports = async (req, res) => {

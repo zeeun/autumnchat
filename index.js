@@ -11,6 +11,10 @@ const SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"];
 const key = require("./service-account.json");
 
 app.post("/webhook", async (req, res) => {
+  console.log(
+    "📩 Received webhook request from Dialogflow:",
+    req.body.queryResult
+  );
   const requestedTime = new Date(); // 향후 사용자 입력으로 확장 가능
 
   const checkStart = new Date(requestedTime);
@@ -70,8 +74,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Server listening on port", PORT);
 });
-
-console.log(
-  "📩 Received webhook request from Dialogflow:",
-  req.body.queryResult
-);

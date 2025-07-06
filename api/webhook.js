@@ -6,18 +6,29 @@ const SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"];
 
 // 환경 변수 또는 서비스 계정 파일에서 인증 정보 로드
 function getAuthCredentials() {
+  console.log("🔍 Checking environment variables...");
+  console.log("GOOGLE_CLIENT_EMAIL exists:", !!process.env.GOOGLE_CLIENT_EMAIL);
+  console.log("GOOGLE_PRIVATE_KEY exists:", !!process.env.GOOGLE_PRIVATE_KEY);
+
   if (process.env.GOOGLE_PRIVATE_KEY && process.env.GOOGLE_CLIENT_EMAIL) {
+    console.log("✅ Using environment variables for authentication");
     return {
       client_email: process.env.GOOGLE_CLIENT_EMAIL,
       private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
     };
   } else {
+    console.log(
+      "⚠️ Environment variables not found, trying service account file..."
+    );
     try {
+      // Vercel에서는 루트 경로에서 파일을 찾도록 수정
       const key = require("../service-account.json");
+      console.log("✅ Using service account file for authentication");
       return key;
     } catch (error) {
+      console.error("❌ Service account file not found:", error.message);
       throw new Error(
-        "No authentication credentials found. Please set environment variables or add service-account.json file."
+        "No authentication credentials found. Please set environment variables (GOOGLE_CLIENT_EMAIL, GOOGLE_PRIVATE_KEY) or add service-account.json file."
       );
     }
   }

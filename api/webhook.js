@@ -9,6 +9,33 @@ function getAuthCredentials() {
   console.log("🔍 Checking environment variables...");
   console.log("GOOGLE_CLIENT_EMAIL exists:", !!process.env.GOOGLE_CLIENT_EMAIL);
   console.log("GOOGLE_PRIVATE_KEY exists:", !!process.env.GOOGLE_PRIVATE_KEY);
+  console.log(
+    "GOOGLE_SERVICE_ACCOUNT_BASE64 exists:",
+    !!process.env.GOOGLE_SERVICE_ACCOUNT_BASE64
+  );
+
+  // 방법 1: Base64로 인코딩된 전체 서비스 계정 사용 (가장 안전)
+  if (process.env.GOOGLE_SERVICE_ACCOUNT_BASE64) {
+    console.log("✅ Using Base64 encoded service account");
+    try {
+      const serviceAccountJson = Buffer.from(
+        process.env.GOOGLE_SERVICE_ACCOUNT_BASE64,
+        "base64"
+      ).toString("utf8");
+      const serviceAccount = JSON.parse(serviceAccountJson);
+      console.log(
+        "🔑 Decoded service account client_email:",
+        serviceAccount.client_email
+      );
+      return serviceAccount;
+    } catch (error) {
+      console.error(
+        "❌ Failed to decode Base64 service account:",
+        error.message
+      );
+      throw new Error("Invalid Base64 encoded service account");
+    }
+  }
 
   if (process.env.GOOGLE_PRIVATE_KEY && process.env.GOOGLE_CLIENT_EMAIL) {
     console.log("✅ Using environment variables for authentication");

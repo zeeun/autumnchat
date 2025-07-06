@@ -16,17 +16,39 @@ function getAuthCredentials() {
     // Private key 처리 개선
     let privateKey = process.env.GOOGLE_PRIVATE_KEY;
 
+    console.log("🔑 Raw private key length:", privateKey.length);
+    console.log(
+      "🔑 Raw private key sample:",
+      privateKey.substring(0, 100) + "..."
+    );
+
     // 따옴표 제거 (만약 있다면)
     if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
       privateKey = privateKey.slice(1, -1);
+      console.log("📝 Removed quotes from private key");
     }
 
-    // 개행 문자 처리
-    privateKey = privateKey.replace(/\\n/g, "\n");
+    // 개행 문자 처리 - 더 안전하게
+    if (privateKey.includes("\\n")) {
+      privateKey = privateKey.replace(/\\n/g, "\n");
+      console.log("📝 Converted \\n to actual newlines");
+    }
+
+    // 기본적인 private key 형식 검증
+    if (
+      !privateKey.includes("-----BEGIN PRIVATE KEY-----") ||
+      !privateKey.includes("-----END PRIVATE KEY-----")
+    ) {
+      throw new Error("Invalid private key format. Missing BEGIN/END markers.");
+    }
 
     console.log(
-      "🔑 Private key starts with:",
+      "🔑 Processed private key starts with:",
       privateKey.substring(0, 50) + "..."
+    );
+    console.log(
+      "🔑 Processed private key ends with:",
+      "..." + privateKey.substring(privateKey.length - 50)
     );
 
     return {

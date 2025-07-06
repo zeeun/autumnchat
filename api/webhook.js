@@ -1,21 +1,19 @@
-const express = require("express");
-const bodyParser = require("body-parser");
 const { google } = require("googleapis");
-const app = express();
-
-app.use(bodyParser.json());
+const key = require("../../service-account.json"); // 상위 경로 주의
 
 const calendarId =
   "f27a218c76e60ea7473ed0c62a7b07820b6e824bfdd4421fe34353763ce04a19@group.calendar.google.com";
 const SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"];
-const key = require("./service-account.json");
 
-app.post("/webhook", async (req, res) => {
-  console.log(
-    "📩 Received webhook request from Dialogflow:",
-    req.body.queryResult
-  );
-  const requestedTime = new Date(); // 향후 사용자 입력으로 확장 가능
+module.exports = async (req, res) => {
+  if (req.method !== "POST") {
+    return res.status(405).json({ message: "Method Not Allowed" });
+  }
+
+  console.log("📩 Dialogflow request:", req.body.queryResult);
+
+  const paramTime = req.body.queryResult.parameters["date-time"];
+  const requestedTime = paramTime ? new Date(paramTime) : new Date();
 
   const checkStart = new Date(requestedTime);
   checkStart.setHours(checkStart.getHours() - 6);
@@ -47,7 +45,6 @@ app.post("/webhook", async (req, res) => {
   for (let event of events) {
     const start = new Date(event.start.dateTime || event.start.date);
     const end = new Date(event.end.dateTime || event.end.date);
-
     if (end <= requestedTime) {
       if (!closestEnd || end > closestEnd) closestEnd = end;
     } else if (start <= requestedTime && end >= requestedTime) {
@@ -67,10 +64,5 @@ app.post("/webhook", async (req, res) => {
     message = "요청하신 시간은 예약 가능합니다! 변경 원하시면 말씀해주세요 😊";
   }
 
-  res.json({ fulfillmentText: message });
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log("Server listening on port", PORT);
-});
+  res.status(200).json({ fulfillmentText: message });
+};

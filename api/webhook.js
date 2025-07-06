@@ -7,12 +7,29 @@ const SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"];
 // 환경 변수 또는 서비스 계정 파일에서 인증 정보 로드
 function getAuthCredentials() {
   console.log("🔍 Checking environment variables...");
+  console.log(
+    "📋 ALL Google-related environment variables:",
+    Object.keys(process.env).filter((key) => key.includes("GOOGLE"))
+  );
   console.log("GOOGLE_CLIENT_EMAIL exists:", !!process.env.GOOGLE_CLIENT_EMAIL);
   console.log("GOOGLE_PRIVATE_KEY exists:", !!process.env.GOOGLE_PRIVATE_KEY);
   console.log(
     "GOOGLE_SERVICE_ACCOUNT_BASE64 exists:",
     !!process.env.GOOGLE_SERVICE_ACCOUNT_BASE64
   );
+
+  if (process.env.GOOGLE_SERVICE_ACCOUNT_BASE64) {
+    console.log(
+      "📏 GOOGLE_SERVICE_ACCOUNT_BASE64 length:",
+      process.env.GOOGLE_SERVICE_ACCOUNT_BASE64.length
+    );
+    console.log(
+      "🔤 GOOGLE_SERVICE_ACCOUNT_BASE64 start:",
+      process.env.GOOGLE_SERVICE_ACCOUNT_BASE64.substring(0, 100)
+    );
+  } else {
+    console.log("❌ GOOGLE_SERVICE_ACCOUNT_BASE64 is not set or empty");
+  }
 
   // 방법 1: Base64로 인코딩된 전체 서비스 계정 사용 (가장 안전)
   if (process.env.GOOGLE_SERVICE_ACCOUNT_BASE64) {
